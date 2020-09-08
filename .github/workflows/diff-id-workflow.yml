@@ -1,0 +1,36 @@
+name: Check diff
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  check-diff:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: branch-file-diff-workflow
+        fetch-depth: 0
+
+    # - name: Modify file
+    #   run: echo "file A" > file-a
+
+    - id: check-if-changed
+      if: ${{ false }}
+      run: echo "::set-output name=changed::$(git diff origin/branch-a --no-patch --exit-code -- file-a; echo $?)"
+
+    - id: print-output
+      run: echo ${{ steps.check-if-changed.outputs.changed }}
+
+    - id: print-status
+      run: echo $(git diff origin/branch-a)
+
+    - name: Print if changed
+      if: steps.check-if-changed.outputs.changed != 0
+      run: echo "Changed"
+
+    - name: Print if not changed
+      if: steps.check-if-changed.outputs.changed == 0
+      run: echo "Not changed"
